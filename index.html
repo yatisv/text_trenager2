@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Практическая работа №2. Работа с абзацами — Информатика 7–8 класс</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ===== Theme variables ===== */
+  :root {
+    --app-bg: #e2e8f0;
+    --panel-bg: #f8fafc;
+    --card-bg: #ffffff;
+    --ribbon-bg: #f1f5f9;
+    --ribbon-active-bg: #ffffff;
+    --editor-bg: #cbd5e1;
+    --header-bg: #ffffff;
+    --header-text: #0f172a;
+    --header-subtext: #475569;
+    --header-status: #64748b;
+    --header-border: #cbd5e1;
+    --text-primary: #1e293b;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --border: #cbd5e1;
+    --border-light: #e2e8f0;
+    --hover-bg: #f1f5f9;
+    --hover-bg-strong: #e2e8f0;
+    --btn-text: #334155;
+    --input-bg: #ffffff;
+    --input-border: #cbd5e1;
+    --dropdown-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    --task-header-bg: linear-gradient(135deg, #1e293b, #0f172a);
+    --title-bar-bg: #2b579a;
+    --page-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --scrollbar-thumb: #cbd5e1;
+    --modal-overlay: rgba(0, 0, 0, 0.4);
+  }
+  .dark {
+    --app-bg: #0f172a;
+    --panel-bg: #1e293b;
+    --card-bg: #334155;
+    --ribbon-bg: #1e293b;
+    --ribbon-active-bg: #334155;
+    --editor-bg: #0f172a;
+    --header-bg: #1e293b;
+    --header-text: #e2e8f0;
+    --header-subtext: #cbd5e1;
+    --header-status: #94a3b8;
+    --header-border: #334155;
+    --text-primary: #e2e8f0;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --border: #334155;
+    --border-light: #475569;
+    --hover-bg: #334155;
+    --hover-bg-strong: #475569;
+    --btn-text: #cbd5e1;
+    --input-bg: #1e293b;
+    --input-border: #475569;
+    --dropdown-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    --task-header-bg: linear-gradient(135deg, #020617, #0f172a);
+    --title-bar-bg: #1e3a8a;
+    --page-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    --scrollbar-thumb: #475569;
+    --modal-overlay: rgba(0, 0, 0, 0.6);
+  }
+
+  html, body { height: 100%; font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif; background: var(--app-bg); color: var(--text-primary); overflow: hidden; transition: background 0.2s, color 0.2s; }
+
+  /* ===== Layout ===== */
+  .app { display: flex; flex-direction: column; height: 100vh; }
+  .app-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--header-bg); border-bottom: 1px solid var(--header-border); flex-shrink: 0; }
+  .app-header .logo { display: flex; align-items: center; gap: 10px; }
+  .app-header .logo .badge { width: 36px; height: 36px; border-radius: 6px; background: #2b579a; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+  .app-header h1 { font-size: 14px; font-weight: 600; color: var(--header-text); }
+  .app-header p { font-size: 12px; color: var(--header-subtext); }
+  .app-header .status { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--header-status); }
+  .app-header .status .dot { background: #d1fae5; color: #047857; padding: 4px 10px; border-radius: 999px; font-weight: 500; }
+  .app-header .header-controls { display: flex; align-items: center; gap: 6px; }
+  .app-header .icon-btn { background: transparent; border: 1px solid transparent; border-radius: 6px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--header-subtext); font-size: 16px; }
+  .app-header .icon-btn:hover { background: var(--hover-bg); color: var(--header-text); border-color: var(--border); }
+  .app-header .icon-btn svg { width: 18px; height: 18px; }
+
+  .split { display: flex; flex: 1; overflow: hidden; }
+
+  /* ===== Task panel (left) ===== */
+  .task-panel { width: 32%; min-width: 320px; max-width: 50%; background: var(--panel-bg); display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+  .task-panel header { background: var(--task-header-bg); color: white; padding: 12px 16px; }
+  .task-panel header .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .task-panel header .badges .b { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .task-panel header .badges .b.green { background: rgba(16, 185, 129, 0.9); color: white; }
+  .task-panel header .badges .b.outline { border: 1px solid rgba(255, 255, 255, 0.3); color: white; }
+  .task-panel header h2 { font-size: 14px; font-weight: 600; line-height: 1.35; }
+  .task-panel .body { flex: 1; overflow-y: auto; padding: 12px; }
+  .task-panel .body::-webkit-scrollbar { width: 8px; }
+  .task-panel .body::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+
+  .card { background: var(--card-bg); border: 1px solid var(--border-light); border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+  .card .head { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--ribbon-bg); cursor: pointer; user-select: none; border: none; width: 100%; text-align: left; font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .card .head:hover { background: var(--hover-bg-strong); }
+  .card .head .icon { display: flex; align-items: center; gap: 8px; }
+  .card .head .chev { color: var(--text-muted); font-size: 14px; }
+  .card .body { padding: 12px; }
+  .card.collapsed .body { display: none; }
+
+  .goal-box { background: color-mix(in srgb, #bae6fd 18%, var(--card-bg)); border: 1px solid #bae6fd; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; font-size: 13px; line-height: 1.5; color: #0369a1; }
+  .dark .goal-box { color: #7dd3fc; }
+  .goal-box .title { display: flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 4px; }
+
+  .theory-list { font-size: 13px; line-height: 1.5; color: var(--text-secondary); }
+  .theory-list li { margin-left: 16px; margin-bottom: 6px; list-style: disc; }
+
+  .step { background: var(--card-bg); border: 1px solid var(--border-light); border-radius: 6px; padding: 10px 12px; margin-bottom: 8px; }
+  .step .num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 999px; background: var(--text-primary); color: var(--card-bg); font-size: 11px; font-weight: 600; margin-right: 6px; vertical-align: middle; }
+  .step h3 { display: inline; font-size: 13px; font-weight: 600; color: var(--text-primary); vertical-align: middle; }
+  .step p { margin-top: 4px; font-size: 13px; line-height: 1.5; color: var(--text-secondary); }
+  .step .hint-btn { margin-top: 8px; background: transparent; border: none; color: #b45309; font-size: 12px; cursor: pointer; padding: 4px 8px; border-radius: 4px; }
+  .dark .step .hint-btn { color: #fbbf24; }
+  .step .hint-btn:hover { background: rgba(251, 191, 36, 0.15); }
+  .step .hint { margin-top: 6px; background: rgba(251, 191, 36, 0.12); padding: 8px 10px; border-radius: 6px; font-size: 12px; line-height: 1.5; color: #92400e; display: none; }
+  .dark .step .hint { color: #fcd34d; background: rgba(251, 191, 36, 0.1); }
+  .step .hint.open { display: block; }
+
+  .progress { background: rgba(16, 185, 129, 0.12); border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; }
+  .progress .top { display: flex; justify-content: space-between; font-size: 12px; font-weight: 500; color: #047857; margin-bottom: 4px; }
+  .dark .progress .top { color: #6ee7b7; }
+  .progress .bar { height: 8px; background: rgba(16, 185, 129, 0.25); border-radius: 999px; overflow: hidden; }
+  .progress .bar .fill { height: 100%; background: #10b981; transition: width 0.3s; }
+
+  .check-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border: 1px solid var(--border-light); border-radius: 6px; margin-bottom: 6px; cursor: pointer; background: var(--card-bg); }
+  .check-item:hover { background: var(--hover-bg); }
+  .check-item.checked { border-color: rgba(16, 185, 129, 0.5); background: rgba(16, 185, 129, 0.12); }
+  .check-item .box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 4px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
+  .check-item.checked .box { background: #10b981; border-color: #10b981; color: white; }
+  .check-item.checked .box::before { content: "✓"; font-size: 12px; font-weight: 700; }
+  .check-item .text { font-size: 13px; line-height: 1.4; color: var(--text-primary); }
+  .check-item.checked .text { color: var(--text-muted); text-decoration: line-through; }
+
+  .reference { font-size: 13px; line-height: 1.5; color: var(--text-secondary); background: var(--card-bg); border: 1px solid var(--border-light); border-radius: 6px; padding: 10px 12px; }
+  .reference h4 { font-size: 16px; font-weight: 700; text-align: center; margin-bottom: 8px; color: var(--text-primary); }
+  .reference p { margin-bottom: 8px; text-align: justify; }
+  .reference ul { margin: 0 0 8px 20px; }
+  .reference table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+  .reference th, .reference td { border: 1px solid var(--border); padding: 4px 8px; font-size: 13px; }
+  .reference th { background: var(--ribbon-bg); font-weight: 600; text-align: left; }
+
+  /* No-copy protection for steps and reference */
+  .no-copy { user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
+  .no-copy img, .no-copy svg { -webkit-user-drag: none; user-drag: none; }
+  .no-copy .step .hint-btn, .no-copy .step .num { user-select: none; }
+  /* Allow buttons/inputs inside no-copy to remain interactive */
+  .no-copy button, .no-copy input, .no-copy a { user-select: none; }
+
+  /* ===== Editor (right) ===== */
+  .editor { flex: 1; display: flex; flex-direction: column; background: var(--app-bg); min-width: 0; }
+  .title-bar { display: flex; align-items: center; gap: 8px; background: var(--title-bar-bg); color: white; padding: 6px 12px; }
+  .title-bar .name { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; margin-right: 8px; }
+  .title-bar button { background: transparent; border: none; color: white; padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+  .title-bar button:hover { background: rgba(255, 255, 255, 0.15); }
+  .title-bar .spacer { flex: 1; }
+  .title-bar .filename-wrap { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+  .title-bar .filename { background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.2); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; width: 180px; }
+  .title-bar .filename:focus { outline: none; background: rgba(255, 255, 255, 0.25); }
+  .title-bar .saved { font-size: 11px; color: rgba(255, 255, 255, 0.7); }
+
+  .quick-bar { display: flex; align-items: center; gap: 4px; background: var(--ribbon-bg); padding: 4px 8px; border-bottom: 1px solid var(--border); }
+  .quick-bar .sep { width: 1px; height: 16px; background: var(--border); margin: 0 4px; }
+  .quick-bar .tip { font-size: 12px; color: var(--text-secondary); margin-left: 8px; }
+
+  /* Ribbon tabs */
+  .ribbon-tabs { display: flex; background: var(--ribbon-bg); border-bottom: 1px solid var(--border); }
+  .ribbon-tabs button { background: transparent; border: none; padding: 6px 16px; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; position: relative; }
+  .ribbon-tabs button:hover { background: var(--hover-bg-strong); }
+  .ribbon-tabs button.active { background: var(--ribbon-active-bg); color: #2b579a; border-bottom: 2px solid #2b579a; }
+  .dark .ribbon-tabs button.active { color: #93c5fd; border-bottom-color: #93c5fd; }
+  .ribbon-tabs button:disabled { color: var(--text-muted); opacity: 0.45; cursor: not-allowed; }
+  .ribbon-tabs button:disabled:hover { background: transparent; }
+  .ribbon-tabs button:disabled.active { background: transparent; border-bottom: 2px solid transparent; }
+
+  /* Ribbon content */
+  .ribbon { display: flex; flex-wrap: wrap; background: var(--ribbon-active-bg); padding: 6px 8px; border-bottom: 1px solid var(--border); gap: 0; }
+  .group { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0 8px; border-right: 1px solid var(--border-light); }
+  .group:last-child { border-right: none; }
+  .group .controls { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+  .group .label { font-size: 10px; color: var(--text-muted); font-weight: 500; }
+
+  .btn { background: transparent; border: 1px solid transparent; padding: 4px 6px; border-radius: 4px; cursor: pointer; color: var(--btn-text); font-size: 13px; display: inline-flex; align-items: center; gap: 4px; min-width: 28px; min-height: 28px; justify-content: center; }
+  .btn:hover { background: var(--hover-bg); border-color: var(--border); }
+  .btn.active { background: #dbeafe; border-color: #93c5fd; color: #1e40af; }
+  .dark .btn.active { background: rgba(59, 130, 246, 0.25); border-color: #60a5fa; color: #93c5fd; }
+  .btn-outline { background: var(--card-bg); border: 1px solid var(--input-border); padding: 4px 8px; border-radius: 4px; cursor: pointer; color: var(--btn-text); font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
+  .btn-outline:hover { background: var(--hover-bg); border-color: var(--text-muted); }
+  .btn-icon { width: 32px; height: 32px; padding: 0; }
+
+  select.combo { height: 30px; padding: 0 8px; border: 1px solid var(--input-border); border-radius: 4px; font-size: 12px; background: var(--input-bg); color: var(--text-primary); cursor: pointer; }
+  select.combo:hover { border-color: var(--text-muted); }
+  select.combo option { background: var(--card-bg); color: var(--text-primary); }
+
+  /* Dropdown */
+  .dropdown { position: relative; display: inline-block; }
+  .dropdown-menu { display: none; position: absolute; top: 100%; left: 0; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; box-shadow: var(--dropdown-shadow); padding: 4px; z-index: 100; min-width: 160px; max-height: 320px; overflow-y: auto; }
+  .dropdown.open .dropdown-menu { display: block; }
+  .dropdown-menu .menu-label { padding: 6px 10px; font-size: 11px; font-weight: 600; color: var(--text-muted); }
+  .dropdown-menu .sep { height: 1px; background: var(--border-light); margin: 4px 0; }
+  .dropdown-menu .item { padding: 6px 10px; font-size: 12px; color: var(--text-primary); cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 8px; }
+  .dropdown-menu .item:hover { background: var(--hover-bg); }
+  .dropdown-menu .grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; padding: 8px; }
+  .dropdown-menu .swatch { width: 16px; height: 16px; border: 1px solid var(--border); border-radius: 2px; cursor: pointer; }
+  .dropdown-menu .swatch:hover { transform: scale(1.2); }
+  .dropdown-menu .color-btn { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; min-width: 16px; min-height: 16px; border: 1px solid var(--border); border-radius: 2px; cursor: pointer; padding: 0; margin: 0; }
+  .dropdown-menu .color-btn:hover { transform: scale(1.2); border-color: var(--text-muted); }
+
+  /* Shapes grid */
+  .shapes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 6px; }
+  .shape-cell { width: 56px; height: 56px; border: 1px solid var(--border-light); border-radius: 4px; background: var(--card-bg); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--text-secondary); }
+  .shape-cell:hover { border-color: #2b579a; background: var(--hover-bg); color: #2b579a; }
+  .dark .shape-cell:hover { color: #93c5fd; border-color: #60a5fa; }
+  .shape-cell .lbl { font-size: 9px; line-height: 1; }
+  .shape-cell svg { width: 24px; height: 24px; }
+
+  /* Ruler */
+  .ruler { height: 20px; background: var(--ribbon-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 12px; }
+  .ruler .scale { width: 100%; height: 12px; position: relative; display: flex; justify-content: space-between; }
+  .ruler .mark { display: flex; flex-direction: column; align-items: center; font-size: 9px; color: var(--text-muted); }
+  .ruler .mark .tick { width: 1px; height: 6px; background: var(--text-muted); }
+
+  /* Editor area */
+  .editor-area { flex: 1; overflow: auto; background: var(--editor-bg); padding: 24px; }
+  .editor-area::-webkit-scrollbar { width: 10px; height: 10px; }
+  .editor-area::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 5px; }
+  .page { background: white; width: 21cm; max-width: 100%; min-height: 29.7cm; padding: 2cm; margin: 0 auto; box-shadow: var(--page-shadow); position: relative; color: #000; }
+  .editor-content { min-height: 27cm; outline: none; font-family: "Times New Roman", serif; font-size: 14pt; line-height: 1.15; position: relative; color: #000; }
+  .editor-content:empty::before { content: attr(data-placeholder); color: #94a3b8; pointer-events: none; }
+  .editor-content p { margin: 0 0 8px 0; }
+  .editor-content ul, .editor-content ol { margin: 0 0 8px 0; padding-left: 28px; }
+  .editor-content table { border-collapse: collapse; }
+  .editor-content td, .editor-content th { border: 1px solid #555; padding: 6px 8px; word-break: break-word; overflow-wrap: break-word; }
+  .editor-content ul.list-square { list-style-type: square; }
+  .editor-content ul.list-check { list-style: none; padding-left: 1.6em; }
+  .editor-content ul.list-check > li { position: relative; }
+  .editor-content ul.list-check > li::before { content: "✓ "; color: #16a34a; font-weight: bold; position: absolute; left: -1.5em; }
+  .editor-content ul.list-diamond { list-style: none; padding-left: 1.6em; }
+  .editor-content ul.list-diamond > li { position: relative; }
+  .editor-content ul.list-diamond > li::before { content: "◆ "; color: #2b579a; font-weight: bold; position: absolute; left: -1.5em; }
+
+  /* Shapes inside editor */
+  .editor-content .trainer-shape { position: absolute; user-select: none; cursor: move; box-sizing: border-box; }
+  .editor-content .trainer-shape svg { width: 100%; height: 100%; display: block; pointer-events: none; }
+  .editor-content .trainer-shape img { width: 100%; height: 100%; display: block; pointer-events: none; object-fit: fill; }
+  .editor-content .trainer-shape.is-selected { outline: 1.5px dashed #2b579a; outline-offset: 2px; }
+  .editor-content .trainer-shape .resize-handle { position: absolute; right: -7px; bottom: -7px; width: 14px; height: 14px; background: white; border: 2px solid #2b579a; border-radius: 2px; cursor: nwse-resize; pointer-events: auto; }
+  .editor-content .trainer-shape .rotate-handle { position: absolute; top: -28px; left: 50%; margin-left: -7px; width: 14px; height: 14px; background: white; border: 2px solid #2b579a; border-radius: 50%; cursor: grab; pointer-events: auto; z-index: 10; }
+  .editor-content .trainer-shape .rotate-handle::before { content: ''; position: absolute; top: 14px; left: 50%; margin-left: -0.5px; width: 1px; height: 14px; background: #2b579a; }
+  .editor-content .trainer-shape .rotate-handle:active { cursor: grabbing; }
+
+  /* Table cell selection */
+  .editor-content td.selected-cell, .editor-content th.selected-cell { outline: 2px solid #2b579a; outline-offset: -2px; }
+  .editor-content td.selected-range, .editor-content th.selected-range { outline: 2px solid #2b579a; outline-offset: -2px; background-color: rgba(43, 87, 154, 0.15) !important; user-select: none; }
+
+  /* Table resize handle (like shapes) */
+  .table-resize-handle { position: fixed; width: 14px; height: 14px; background: white; border: 2px solid #2b579a; border-radius: 2px; cursor: nwse-resize; z-index: 140; display: none; pointer-events: auto; }
+  .table-resize-handle:hover { background: #2b579a; }
+
+  /* Table ribbon controls */
+  .ribbon .size-input { width: 60px; height: 30px; padding: 0 6px; border: 1px solid var(--input-border); border-radius: 4px; font-size: 12px; background: var(--input-bg); color: var(--text-primary); }
+  .ribbon .size-input:focus { outline: none; border-color: #2b579a; }
+  .ribbon .size-label { font-size: 11px; color: var(--text-secondary); }
+
+  /* Status bar */
+  .status-bar { display: flex; align-items: center; justify-content: space-between; background: var(--ribbon-bg); border-top: 1px solid var(--border); padding: 4px 12px; font-size: 12px; color: var(--text-secondary); }
+  .status-bar .group-stats { display: flex; gap: 12px; }
+
+  /* Modal */
+  .modal-backdrop { position: fixed; inset: 0; background: var(--modal-overlay); display: none; align-items: center; justify-content: center; z-index: 200; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: var(--card-bg); border-radius: 8px; padding: 20px; width: 420px; max-width: 90vw; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25); color: var(--text-primary); }
+  .modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text-primary); }
+  .modal .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 12px; }
+  .modal .field label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+  .modal .field input { width: 100%; height: 36px; padding: 0 8px; border: 1px solid var(--input-border); border-radius: 4px; font-size: 13px; background: var(--input-bg); color: var(--text-primary); }
+  .modal .field .hint { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+  .modal .preview { background: var(--hover-bg); padding: 8px 12px; border-radius: 6px; font-size: 12px; color: var(--text-secondary); margin-bottom: 16px; }
+  .modal .actions { display: flex; justify-content: flex-end; gap: 8px; }
+  .modal .btn-primary { background: #2b579a; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+  .modal .btn-primary:hover { background: #214783; }
+  .modal .btn-secondary { background: var(--card-bg); color: var(--text-primary); border: 1px solid var(--input-border); padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+  .modal .btn-secondary:hover { background: var(--hover-bg); }
+
+  /* Shape floating toolbar */
+  .shape-toolbar { position: fixed; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; box-shadow: var(--dropdown-shadow); display: none; align-items: center; gap: 8px; z-index: 150; }
+  .shape-toolbar.open { display: flex; }
+  .shape-toolbar .label { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+  .shape-toolbar .colors { display: flex; gap: 2px; }
+  .shape-toolbar .color-btn { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border: 1px solid var(--border); border-radius: 2px; cursor: pointer; padding: 0; margin: 0; }
+  .shape-toolbar .color-btn:hover { transform: scale(1.2); }
+  .shape-toolbar .sep { width: 1px; height: 16px; background: var(--border); margin: 0 4px; }
+  .shape-toolbar .delete { background: transparent; border: none; color: #dc2626; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
+  .shape-toolbar .delete:hover { background: rgba(239, 68, 68, 0.15); }
+  .shape-toolbar .dims { font-size: 10px; color: var(--text-muted); }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: white; padding: 12px 16px; border-radius: 6px; font-size: 13px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25); opacity: 0; transform: translateY(20px); transition: opacity 0.3s, transform 0.3s; z-index: 300; max-width: 360px; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast .title { font-weight: 600; }
+  .toast .desc { font-size: 12px; color: #cbd5e1; margin-top: 4px; }
+
+  /* Mobile */
+  @media (max-width: 900px) {
+    .split { flex-direction: column; }
+    .task-panel { width: 100%; max-width: 100%; min-width: 0; max-height: 40vh; }
+    .editor { min-height: 60vh; }
+    .ribbon { overflow-x: auto; }
+    .hide-mobile { display: none; }
+  }
+</style>
+<script>
+  // Apply saved theme before render to avoid flash
+  (function() {
+    try {
+      var t = localStorage.getItem('trainer-theme');
+      if (t === 'dark') document.documentElement.classList.add('dark');
+    } catch(e) {}
+  })();
+</script>
+</head>
+<body>
+<div class="app">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="logo">
+      <div class="badge">И</div>
+      <div>
+        <h1>Практическая работа №2. Работа с абзацами</h1>
+        <p>Урок информатики · 7–8 класс · Тренажёр текстового редактора</p>
+      </div>
+    </div>
+    <div class="status">
+      <span class="dot">● Тренажёр активен</span>
+      <span class="hide-mobile">Слева — задание · справа — редактор</span>
+      <div class="header-controls">
+        <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Переключить тему (светлая/тёмная)" aria-label="Переключить тему">
+          <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+          </svg>
+        </button>
+        <button class="icon-btn" id="fullscreen-btn" onclick="toggleFullscreen()" title="Развернуть на весь экран (F11)" aria-label="Полноэкранный режим">
+          <svg id="fullscreen-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="split">
+    <!-- ===== TASK PANEL ===== -->
+    <aside class="task-panel">
+      <header>
+        <div class="badges">
+          <span class="b green">Информатика</span>
+          <span class="b outline">7–8 класс</span>
+          <span class="b outline">⏱ 40 минут</span>
+        </div>
+        <h2>Практическая работа №2. Форматирование текста и работа с абзацами</h2>
+      </header>
+      <div class="body">
+        <div class="goal-box">
+          <div class="title">📋 Цель работы</div>
+          Закрепить навыки форматирования текста и работы с абзацами: разбивка текста на абзацы, выделение определений, установка интервала после абзаца и выравнивания по ширине.
+        </div>
+
+        <div class="card" id="card-theory">
+          <button class="head" onclick="toggleCard('card-theory')">
+            <span class="icon">📖 Краткая теория</span>
+            <span class="chev">▼</span>
+          </button>
+          <div class="body">
+            <ul class="theory-list">
+              <li>Текстовый редактор — программа для создания, редактирования и форматирования текстовых документов. Примеры: Microsoft Word, LibreOffice Writer, Google Docs.</li>
+              <li>Форматирование — изменение внешнего вида текста: шрифта, размера, начертания (полужирный, курсив, подчёркивание), цвета и выравнивания.</li>
+              <li>Шрифт определяет внешний вид букв. Популярные шрифты: Times New Roman, Arial, Tahoma, Calibri. Размер шрифта измеряется в пунктах (пт) — например, 12 пт, 14 пт.</li>
+              <li>Абзац — часть текста между двумя нажатиями клавиши Enter. Чтобы создать новый абзац, нажмите Enter. Чтобы объединить два абзаца, поставьте курсор в начало второго и нажмите Backspace.</li>
+              <li>Выравнивание абзаца: по левому краю, по центру, по правому краю, по ширине. Интервал после абзаца — пустое пространство снизу абзаца (измеряется в пунктах, пт).</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card" id="card-steps">
+          <button class="head" onclick="toggleCard('card-steps')">
+            <span class="icon">📋 Порядок выполнения</span>
+            <span class="chev">▼</span>
+          </button>
+          <div class="body no-copy" id="steps-container"></div>
+        </div>
+
+        <div class="card" id="card-checklist">
+          <button class="head" onclick="toggleCard('card-checklist')">
+            <span class="icon">✅ Чек-лист самопроверки</span>
+            <span class="chev">▼</span>
+          </button>
+          <div class="body">
+            <div class="progress">
+              <div class="top"><span>Выполнено: <span id="progress-text">0 из 9</span></span><span id="progress-percent">0%</span></div>
+              <div class="bar"><div class="fill" id="progress-fill" style="width:0%"></div></div>
+            </div>
+            <div id="checklist-container"></div>
+          </div>
+        </div>
+
+        <div class="card collapsed" id="card-reference">
+          <button class="head" onclick="toggleCard('card-reference')">
+            <span class="icon">📋 Образец выполнения</span>
+            <span class="chev">▶</span>
+          </button>
+          <div class="body no-copy">
+            <div class="reference">
+              <h4 style="font-family: 'Times New Roman', serif; font-size: 14pt; font-weight: bold; text-align: center;">СЛОВАРЬ ТЕРМИНОВ</h4>
+              <p style="font-family: 'Times New Roman', serif; font-size: 12pt; font-weight: bold; font-style: italic; text-align: justify; margin-bottom: 3pt; margin-top: 8px;">Команда - инструкция, которая дается компьютеру в виде простейшего указания.</p>
+              <p style="font-family: 'Times New Roman', serif; font-size: 12pt; font-weight: bold; font-style: italic; text-align: justify; margin-bottom: 3pt;">Отображение - представление на экране текста, изображения или рисунка.</p>
+              <p style="font-family: 'Times New Roman', serif; font-size: 12pt; font-weight: bold; font-style: italic; text-align: justify; margin-bottom: 3pt;">Память оперативная - память, в которой временно хранятся инструкции и данные программы.</p>
+              <p style="font-family: 'Times New Roman', serif; font-size: 12pt; font-weight: bold; font-style: italic; text-align: justify; margin-bottom: 3pt;">Память постоянная - память, в которой хранятся неизменные инструкции.</p>
+              <p style="font-family: 'Times New Roman', serif; font-size: 12pt; font-weight: bold; font-style: italic; text-align: justify; margin-bottom: 3pt;">Программа - последовательность компьютера и написанных на языке, который машина понимает или может перевести.</p>
+              <p style="font-family: 'Times New Roman', serif; font-size: 12pt; font-weight: bold; font-style: italic; text-align: justify; margin-bottom: 3pt;">Сообщение об ошибке - примечание, отображаемое на экране компьютером для того, чтобы сигнализировать пользователю о наличии ошибок в программе.</p>
+              <p style="font-family: 'Times New Roman', serif; font-size: 12pt; font-weight: bold; font-style: italic; text-align: justify; margin-bottom: 3pt;">Строка символов - любая последовательность букв, цифр, пробелов, знаков, символов.</p>
+              <div style="margin-top: 14px; padding: 8px 10px; background: rgba(251, 191, 36, 0.12); border-radius: 6px; font-size: 12px; color: #92400e;">
+                <b>Параметры заголовка:</b> Times New Roman, 14 пт, полужирный.<br>
+                <b>Параметры абзацев:</b> Times New Roman, 12 пт, полужирный + курсив, выравнивание по ширине, интервал после абзаца 3 пт.<br>
+                <b>Структура:</b> 7 абзацев — каждое определение в отдельном абзаце.
+              </div>
+            </div>
+            <p style="font-size:11px;color:#64748b;margin-top:8px">Совет: сверяйтесь с образцом, но набирайте и оформляйте текст самостоятельно в редакторе справа.</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== EDITOR ===== -->
+    <main class="editor">
+      <!-- Title bar -->
+      <div class="title-bar">
+        <div class="name">📄 Текстовый редактор</div>
+        <button onclick="newDocument()" title="Создать новый документ">＋ Новый</button>
+        <button onclick="document.getElementById('file-open').click()" title="Открыть документ">📂 Открыть</button>
+        <button onclick="saveDocument()" title="Сохранить в браузере">💾 Сохранить</button>
+        <button onclick="exportDoc()" title="Скачать как документ Word">⬇ Экспорт .docx</button>
+        <button onclick="printDocument()" title="Печать документа">🖨 Печать</button>
+        <div class="spacer"></div>
+        <div class="filename-wrap">
+          <span>Имя файла:</span>
+          <input type="text" class="filename" id="filename" value="Документ1" onchange="markUnsaved()">
+          <span class="saved" id="saved-indicator" style="display:none">сохранено ✓</span>
+        </div>
+      </div>
+
+      <!-- Quick access bar -->
+      <div class="quick-bar">
+        <button class="btn btn-icon" onclick="exec('undo')" title="Отменить (Ctrl+Z)">↶</button>
+        <button class="btn btn-icon" onclick="exec('redo')" title="Повторить (Ctrl+Y)">↷</button>
+        <div class="sep"></div>
+        <button class="btn btn-icon" onclick="clearFormatting()" title="Очистить форматирование">⌫</button>
+        <div class="sep"></div>
+        <span class="tip">Подсказка: выделите текст мышкой и применяйте кнопки форматирования.</span>
+      </div>
+
+      <!-- Ribbon tabs -->
+      <div class="ribbon-tabs">
+        <button id="tab-home" class="active" onclick="switchTab('home')">Главная</button>
+        <button id="tab-insert" onclick="switchTab('insert')">Вставка</button>
+        <button id="tab-table" onclick="switchTab('table')" disabled title="Становится активной при выделении ячейки таблицы">Работа с таблицей</button>
+        <button id="tab-layout" onclick="switchTab('layout')">Разметка страницы</button>
+      </div>
+
+      <!-- Ribbon: Home -->
+      <div class="ribbon" id="ribbon-home">
+        <div class="group">
+          <div class="controls">
+            <select class="combo" id="font-family" onchange="applyFontFamily(this.value)" style="width:140px">
+              <option value="Times New Roman" selected>Times New Roman</option>
+              <option value="Arial">Arial</option>
+              <option value="Calibri">Calibri</option>
+              <option value="Courier New">Courier New</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Verdana">Verdana</option>
+              <option value="Comic Sans MS">Comic Sans MS</option>
+              <option value="Tahoma">Tahoma</option>
+            </select>
+            <select class="combo" id="font-size" onchange="applyFontSize(this.value)" style="width:60px">
+              <option value="10">10</option><option value="12">12</option><option value="14" selected>14</option>
+              <option value="16">16</option><option value="18">18</option><option value="20">20</option>
+              <option value="24">24</option><option value="28">28</option><option value="32">32</option>
+              <option value="36">36</option><option value="48">48</option>
+            </select>
+            <button class="btn btn-icon" onclick="changeFontSize(2)" title="Увеличить шрифт">⤢</button>
+            <button class="btn btn-icon" onclick="changeFontSize(-2)" title="Уменьшить шрифт">⤡</button>
+          </div>
+          <div class="label">Шрифт</div>
+        </div>
+
+        <div class="group">
+          <div class="controls">
+            <button class="btn btn-icon" onclick="exec('bold')" title="Жирный (Ctrl+B)" style="font-weight:700">Ж</button>
+            <button class="btn btn-icon" onclick="exec('italic')" title="Курсив (Ctrl+I)" style="font-style:italic">К</button>
+            <button class="btn btn-icon" onclick="exec('underline')" title="Подчёркнутый (Ctrl+U)" style="text-decoration:underline">Ч</button>
+            <button class="btn btn-icon" onclick="exec('strikeThrough')" title="Зачёркнутый" style="text-decoration:line-through">З</button>
+          </div>
+          <div class="label">Начертание</div>
+        </div>
+
+        <div class="group">
+          <div class="controls">
+            <div class="dropdown" id="dd-textcolor">
+              <button class="btn-outline" onclick="toggleDropdown('dd-textcolor')" title="Цвет текста">A Цвет</button>
+              <div class="dropdown-menu" style="width:180px">
+                <div class="menu-label">Цвет текста</div>
+                <div class="sep"></div>
+                <div class="grid" id="text-colors"></div>
+              </div>
+            </div>
+            <div class="dropdown" id="dd-highlight">
+              <button class="btn-outline" onclick="toggleDropdown('dd-highlight')" title="Цвет выделения">🎨 Выдел.</button>
+              <div class="dropdown-menu" style="width:180px">
+                <div class="menu-label">Цвет выделения</div>
+                <div class="sep"></div>
+                <div class="grid" id="highlight-colors"></div>
+              </div>
+            </div>
+          </div>
+          <div class="label">Цвет</div>
+        </div>
+
+        <div class="group">
+          <div class="controls">
+            <button class="btn btn-icon" onclick="exec('justifyLeft')" title="По левому краю (Ctrl+L)">⬅</button>
+            <button class="btn btn-icon" onclick="exec('justifyCenter')" title="По центру (Ctrl+E)">↔</button>
+            <button class="btn btn-icon" onclick="exec('justifyRight')" title="По правому краю (Ctrl+R)">➡</button>
+            <button class="btn btn-icon" onclick="exec('justifyFull')" title="По ширине (Ctrl+J)">☰</button>
+            <div class="sep" style="width:1px;height:24px;background:#e2e8f0;margin:0 4px"></div>
+            <button class="btn btn-icon" onclick="exec('indent')" title="Увеличить отступ">⇥</button>
+            <button class="btn btn-icon" onclick="exec('outdent')" title="Уменьшить отступ">⇤</button>
+            <div class="sep" style="width:1px;height:24px;background:#e2e8f0;margin:0 4px"></div>
+            <div class="dropdown" id="dd-firstline">
+              <button class="btn-outline" onclick="toggleDropdown('dd-firstline')" title="Отступ первой строки">⇒ 1-я строка</button>
+              <div class="dropdown-menu" style="width:200px">
+                <div class="menu-label">Первая строка</div>
+                <div class="sep"></div>
+                <div class="item" onclick="applyFirstLineIndent('indent')">⇥ Отступ (1,25 см)</div>
+                <div class="item" onclick="applyFirstLineIndent('hanging')">⇤ Выступ (1,25 см)</div>
+                <div class="item" onclick="applyFirstLineIndent('none')">⌫ Нет отступа</div>
+              </div>
+            </div>
+            <div class="dropdown" id="dd-spaceafter">
+              <button class="btn-outline" onclick="toggleDropdown('dd-spaceafter')" title="Интервал после абзаца">⇩ После абзаца</button>
+              <div class="dropdown-menu" style="width:180px">
+                <div class="menu-label">Интервал после абзаца</div>
+                <div class="sep"></div>
+                <div class="item" onclick="applySpaceAfter('0')">Нет (0 пт)</div>
+                <div class="item" onclick="applySpaceAfter('3pt')">3 пт</div>
+                <div class="item" onclick="applySpaceAfter('6pt')">6 пт</div>
+                <div class="item" onclick="applySpaceAfter('10pt')">10 пт</div>
+                <div class="item" onclick="applySpaceAfter('12pt')">12 пт</div>
+                <div class="item" onclick="applySpaceAfter('18pt')">18 пт</div>
+              </div>
+            </div>
+          </div>
+          <div class="label">Абзац</div>
+        </div>
+
+        <div class="group">
+          <div class="controls">
+            <button class="btn btn-icon" onclick="exec('insertUnorderedList')" title="Маркированный список">•</button>
+            <button class="btn btn-icon" onclick="exec('insertOrderedList')" title="Нумерованный список">1.</button>
+            <div class="dropdown" id="dd-bullet">
+              <button class="btn-outline" onclick="toggleDropdown('dd-bullet')" title="Тип маркёра" style="padding:2px 6px">•▪◆✓</button>
+              <div class="dropdown-menu" style="width:180px">
+                <div class="menu-label">Тип маркёра</div>
+                <div class="sep"></div>
+                <div class="item" onclick="applyBulletStyle('disc')">• Стандартный (точка)</div>
+                <div class="item" onclick="applyBulletStyle('square')">▪ Квадрат</div>
+                <div class="item" onclick="applyBulletStyle('diamond')"><span style="color:#2b579a">◆</span> Ромб</div>
+                <div class="item" onclick="applyBulletStyle('check')"><span style="color:#16a34a">✓</span> Галочка</div>
+              </div>
+            </div>
+          </div>
+          <div class="label">Списки</div>
+        </div>
+      </div>
+
+      <!-- Ribbon: Insert -->
+      <div class="ribbon" id="ribbon-insert" style="display:none">
+        <div class="group">
+          <div class="controls">
+            <div class="dropdown" id="dd-table">
+              <button class="btn-outline" onclick="toggleDropdown('dd-table')">📊 Таблица</button>
+              <div class="dropdown-menu" style="width:200px">
+                <div class="menu-label">Вставить таблицу</div>
+                <div class="sep"></div>
+                <div class="item" onclick="insertTable(2,2)">2 × 2</div>
+                <div class="item" onclick="insertTable(3,3)">3 × 3</div>
+                <div class="item" onclick="insertTable(4,3)">4 × 3 (заголовок + 3)</div>
+                <div class="item" onclick="insertTable(4,4)">4 × 4</div>
+                <div class="item" onclick="insertTable(5,5)">5 × 5</div>
+                <div class="sep"></div>
+                <div class="item" onclick="openTableDialog()" style="color:#2b579a;font-weight:600">Произвольный размер…</div>
+              </div>
+            </div>
+          </div>
+          <div class="label">Таблица</div>
+        </div>
+
+        <div class="group">
+          <div class="controls">
+            <button class="btn-outline" onclick="document.getElementById('image-input').click()">🖼 Рисунок</button>
+            <button class="btn btn-icon" onclick="exec('insertHorizontalRule')" title="Горизонтальная линия">―</button>
+          </div>
+          <div class="label">Иллюстрации</div>
+        </div>
+
+        <div class="group">
+          <div class="controls">
+            <div class="dropdown" id="dd-shapes">
+              <button class="btn-outline" onclick="toggleDropdown('dd-shapes')">⬜ Фигуры</button>
+              <div class="dropdown-menu" style="width:200px">
+                <div class="menu-label">6 основных фигур</div>
+                <div class="sep"></div>
+                <div class="shapes-grid" id="shapes-grid"></div>
+                <p style="font-size:10px;color:#64748b;padding:4px 8px">Кликните по фигуре для вставки. Затем двигайте и меняйте размер.</p>
+              </div>
+            </div>
+          </div>
+          <div class="label">Фигуры</div>
+        </div>
+
+        <div class="group">
+          <div class="controls">
+            <div class="dropdown" id="dd-symbol">
+              <button class="btn-outline" onclick="toggleDropdown('dd-symbol')">Σ Символ</button>
+              <div class="dropdown-menu" style="width:200px" id="symbols-menu"></div>
+            </div>
+            <button class="btn btn-icon" onclick="insertSymbol('«»')" title="Кавычки-ёлочки">«»</button>
+            <button class="btn btn-icon" onclick="insertSymbol('→')" title="Стрелка →">→</button>
+            <button class="btn btn-icon" onclick="insertSymbol('§')" title="Символ абзаца">§</button>
+          </div>
+          <div class="label">Символы</div>
+        </div>
+
+        <div class="group">
+          <div class="controls">
+            <button class="btn-outline" onclick="insertPageBreak()">Разрыв страницы</button>
+          </div>
+          <div class="label">Страницы</div>
+        </div>
+      </div>
+
+      <!-- Ribbon: Layout -->
+      <div class="ribbon" id="ribbon-layout" style="display:none">
+        <div class="group">
+          <div class="controls">
+            <div class="dropdown" id="dd-margins">
+              <button class="btn-outline" onclick="toggleDropdown('dd-margins')">Поля</button>
+              <div class="dropdown-menu" style="width:160px">
+                <div class="item" onclick="applyMargins('normal')">Обычные (2 см)</div>
+                <div class="item" onclick="applyMargins('narrow')">Узкие (1,27 см)</div>
+                <div class="item" onclick="applyMargins('wide')">Широкие (2,54 см)</div>
+              </div>
+            </div>
+          </div>
+          <div class="label">Поля страницы</div>
+        </div>
+        <div class="group">
+          <div class="controls">
+            <button class="btn-outline" onclick="applyOrientation('portrait')">Книжная</button>
+            <button class="btn-outline" onclick="applyOrientation('landscape')">Альбомная</button>
+          </div>
+          <div class="label">Ориентация</div>
+        </div>
+        <div class="group">
+          <div class="controls">
+            <select class="combo" onchange="applyLineSpacing(this.value)" style="width:130px">
+              <option value="">Междустрочный</option>
+              <option value="1.0">Одинарный</option>
+              <option value="1.15">1,15</option>
+              <option value="1.5">Полуторный</option>
+              <option value="2.0">Двойной</option>
+            </select>
+          </div>
+          <div class="label">Интервал</div>
+        </div>
+      </div>
+
+      <!-- Ribbon: Table (активна при выделении ячейки) -->
+      <div class="ribbon" id="ribbon-table" style="display:none">
+        <div class="group">
+          <div class="controls">
+            <div class="dropdown" id="dd-borders">
+              <button class="btn-outline" onclick="toggleDropdown('dd-borders')">Границы ▾</button>
+              <div class="dropdown-menu" style="width:190px">
+                <div class="menu-label">Стиль границ</div>
+                <div class="sep"></div>
+                <div class="item" onclick="applyTableBorders('all')">▦ Все границы</div>
+                <div class="item" onclick="applyTableBorders('none')">□ Без границ</div>
+                <div class="item" onclick="applyTableBorders('outer')">▢ Только контур</div>
+                <div class="item" onclick="applyTableBorders('grid')">▦ Сетка (внутр.)</div>
+                <div class="item" onclick="applyTableBorders('horizontal')">☰ Горизонтальные</div>
+                <div class="item" onclick="applyTableBorders('vertical')">∔ Вертикальные</div>
+              </div>
+            </div>
+          </div>
+          <div class="label">Границы</div>
+        </div>
+
+        <div class="group">
+          <div class="controls">
+            <div class="dropdown" id="dd-cellfill">
+              <button class="btn-outline" onclick="toggleDropdown('dd-cellfill')">🎨 Заливка ячейки</button>
+              <div class="dropdown-menu" style="width:200px">
+                <div class="menu-label">Цвет заливки ячейки</div>
+                <div class="sep"></div>
+                <div class="grid" id="cell-colors" style="grid-template-columns: repeat(10, 1fr);"></div>
+              </div>
+            </div>
+          </div>
+          <div class="label">Заливка</div>
+        </div>
+
+        <div class="group">
+          <div class="controls">
+            <button class="btn-outline" onclick="addRowAbove()" title="Добавить строку выше">＋ Стр↑</button>
+            <button class="btn-outline" onclick="addRowBelow()" title="Добавить строку ниже">＋ Стр↓</button>
+          </div>
+          <div class="label">Строки</div>
+        </div>
+
+        <div class="group">
+          <div class="controls">
+            <button class="btn-outline" onclick="addColumnLeft()" title="Добавить столбец слева">＋ Стл←</button>
+            <button class="btn-outline" onclick="addColumnRight()" title="Добавить столбец справа">＋ Стл→</button>
+          </div>
+          <div class="label">Столбцы</div>
+        </div>
+
+        <div class="group">
+          <div class="controls">
+            <button class="btn-outline" onclick="mergeCells()" title="Объединить выделенные ячейки (Shift+клик для диапазона)">⬌ Объединить</button>
+          </div>
+          <div class="label">Объединение</div>
+        </div>
+
+<div class="group">
+          <div class="controls">
+            <button class="btn-outline" onclick="deleteRow()" title="Удалить строку" style="color:#dc2626">✕ Стр</button>
+            <button class="btn-outline" onclick="deleteColumn()" title="Удалить столбец" style="color:#dc2626">✕ Стл</button>
+          </div>
+          <div class="label">Удалить</div>
+        </div>
+
+        <div class="group">
+          <div class="controls">
+            <span class="size-label">Ширина стл:</span>
+            <input type="number" class="size-input" id="col-width-input" placeholder="px" min="20" max="800">
+            <button class="btn-outline" onclick="var v=document.getElementById('col-width-input').value; if(v) setColumnWidth(v);">↵</button>
+            <span class="size-label">Высота стр:</span>
+            <input type="number" class="size-input" id="row-height-input" placeholder="px" min="10" max="600">
+            <button class="btn-outline" onclick="var v=document.getElementById('row-height-input').value; if(v) setRowHeight(v);">↵</button>
+          </div>
+          <div class="label">Размер ячеек</div>
+        </div>
+
+        <div class="group">
+          <div class="controls">
+            <span class="size-label">Ширина табл:</span>
+            <input type="number" class="size-input" id="table-width-input" placeholder="px" min="50" max="2000">
+            <button class="btn-outline" onclick="var v=document.getElementById('table-width-input').value; if(v) setTableWidth(v);">↵</button>
+            <span class="size-label" style="margin-left:6px">или тяните за ◢</span>
+          </div>
+          <div class="label">Размер таблицы</div>
+        </div>
+      </div>
+
+      <!-- Ruler -->
+      <div class="ruler">
+        <div class="scale" id="ruler-scale"></div>
+      </div>
+
+      <!-- Editor area -->
+      <div class="editor-area">
+        <div class="page" id="page">
+          <div class="editor-content" id="editor" contenteditable="true" data-placeholder="Начните набирать текст здесь…" spellcheck="false"></div>
+        </div>
+      </div>
+
+      <!-- Status bar -->
+      <div class="status-bar">
+        <div class="group-stats">
+          <span>Страница 1</span>
+          <span>Слов: <span id="word-count">0</span></span>
+          <span>Знаков: <span id="char-count">0</span></span>
+        </div>
+        <div class="group-stats">
+          <span>Русский (Россия)</span>
+          <span>|</span>
+          <span>100%</span>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Hidden file inputs -->
+<input type="file" id="file-open" accept=".doc,.docx,.html,.htm,.txt" style="display:none" onchange="openFile(event)">
+<input type="file" id="image-input" accept="image/*" style="display:none" onchange="insertImage(event)">
+
+<!-- Custom table dialog -->
+<div class="modal-backdrop" id="table-dialog">
+  <div class="modal">
+    <h3>Вставка таблицы произвольного размера</h3>
+    <div class="row">
+      <div class="field">
+        <label>Число строк</label>
+        <input type="number" id="custom-rows" min="1" max="50" value="3">
+        <div class="hint">от 1 до 50</div>
+      </div>
+      <div class="field">
+        <label>Число столбцов</label>
+        <input type="number" id="custom-cols" min="1" max="20" value="3">
+        <div class="hint">от 1 до 20</div>
+      </div>
+    </div>
+    <div class="preview" id="table-preview">Будет создана таблица 3 × 3 (первая строка — заголовки столбцов).</div>
+    <div class="actions">
+      <button class="btn-secondary" onclick="closeTableDialog()">Отмена</button>
+      <button class="btn-primary" onclick="insertCustomTable()">Вставить таблицу</button>
+    </div>
+  </div>
+</div>
+
+<!-- Shape floating toolbar -->
+<div class="shape-toolbar" id="shape-toolbar">
+  <span class="label" id="shape-color-label">Заливка:</span>
+  <div class="colors" id="shape-colors"></div>
+  <div class="sep" id="shape-color-sep"></div>
+  <button class="delete" onclick="deleteSelectedShape()">🗑 Удалить</button>
+  <span class="dims" id="shape-dims"></span>
+</div>
+
+<!-- Table resize handle (появляется при выделении ячейки) -->
+<div class="table-resize-handle" id="table-resize-handle"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="title" id="toast-title"></div>
+  <div class="desc" id="toast-desc"></div>
+</div>
+
+<script>
+// ====== No-copy protection for steps and reference ======
+function isInNoCopy(el) {
+  if (!el || !el.closest) return false;
+  return !!el.closest('.no-copy');
+}
+
+document.addEventListener('copy', function(e) {
+  if (isInNoCopy(e.target) || isInNoCopy(window.getSelection().anchorNode)) {
+    e.preventDefault();
+    showToast('Копирование запрещено', 'Текст задания и образец нельзя копировать — набирайте вручную.');
+  }
+});
+
+document.addEventListener('cut', function(e) {
+  if (isInNoCopy(e.target)) {
+    e.preventDefault();
+    showToast('Вырезание запрещено', 'Текст задания и образец нельзя копировать.');
+  }
+});
+
+document.addEventListener('contextmenu', function(e) {
+  if (isInNoCopy(e.target)) {
+    e.preventDefault();
+    showToast('Контекстное меню отключено', 'В этом разделе нельзя копировать текст.');
+  }
+});
+
+// Block Ctrl+C / Ctrl+X when selection is inside no-copy
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C' || e.key === 'x' || e.key === 'X')) {
+    var sel = window.getSelection();
+    if (sel.rangeCount > 0 && isInNoCopy(sel.anchorNode)) {
+      e.preventDefault();
+      showToast('Копирование запрещено', 'Набирайте текст задания вручную в редакторе справа.');
+    }
+  }
+});
+
+// ====== Theme ======
+var SUN_ICON = '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>';
+var MOON_ICON = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+var EXPAND_ICON = '<path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"></path>';
+var EXIT_ICON = '<path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3"></path>';
+
+function toggleTheme() {
+  var isDark = document.documentElement.classList.toggle('dark');
+  try { localStorage.setItem('trainer-theme', isDark ? 'dark' : 'light'); } catch(e) {}
+  updateThemeIcon();
+  showToast(isDark ? 'Тёмная тема включена' : 'Светлая тема включена');
+}
+
+function updateThemeIcon() {
+  var isDark = document.documentElement.classList.contains('dark');
+  var icon = document.getElementById('theme-icon');
+  if (icon) icon.innerHTML = isDark ? MOON_ICON : SUN_ICON;
+  var btn = document.getElementById('theme-btn');
+  if (btn) btn.title = isDark ? 'Переключить на светлую тему' : 'Переключить на тёмную тему';
+}
+
+// ====== Fullscreen ======
+function toggleFullscreen() {
+  if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+    var el = document.documentElement;
+    var req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    if (req) {
+      req.call(el).catch(function() {
+        showToast('Не удалось развернуть', 'Браузер заблокировал полноэкранный режим.');
+      });
+    } else {
+      showToast('Не поддерживается', 'Ваш браузер не поддерживает полноэкранный режим. Используйте F11.');
+    }
+  } else {
+    var exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+    if (exit) exit.call(document);
+  }
+}
+
+function updateFullscreenIcon() {
+  var isFS = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+  var icon = document.getElementById('fullscreen-icon');
+  if (icon) icon.innerHTML = isFS ? EXIT_ICON : EXPAND_ICON;
+  var btn = document.getElementById('fullscreen-btn');
+  if (btn) btn.title = isFS ? 'Выйти из полноэкранного режима' : 'Развернуть на весь экран (F11)';
+}
+
+document.addEventListener('fullscreenchange', updateFullscreenIcon);
+document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
+document.addEventListener('msfullscreenchange', updateFullscreenIcon);
+
+// F11 key — let browser handle natively, but provide Esc hint
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'F11') {
+    // Allow browser native F11; our button is alternative
+    // Some browsers block preventDefault on F11
+  }
+});
+
+// ====== Data ======
+var STEPS = [
+  { id:1, title:"Откройте редактор и подготовьтесь", desc:"Выберите текстовый редактор или программу Word и создайте новый документ. В нашем тренажёре документ уже открыт — работайте в правой части окна.", hint:"Верхняя панель тренажёра повторяет интерфейс MS Word: вкладки «Главная», «Вставка», «Разметка страницы»." },
+  { id:2, title:"Введите и отформатируйте заголовок", desc:"Наберите текст «СЛОВАРЬ ТЕРМИНОВ» — это заголовок документа. Выделите его и примените: шрифт Times New Roman, размер 14, начертание — полужирное. После заголовка нажмите Enter.", hint:"Выделите текст мышкой. На вкладке «Главная»: выберите шрифт Times New Roman, размер 14; нажмите кнопку Ж (полужирный)." },
+  { id:3, title:"Введите текст со всеми определениями", desc:"С новой строки наберите все 7 определений подряд одним потоком: «Команда - инструкция, которая дается компьютеру в виде простейшего указания. Отображение - представление на экране текста, изображения или рисунка. Память оперативная - память, в которой временно хранятся инструкции и данные программы. Память постоянная - память, в которой хранятся неизменные инструкции. Программа - последовательность компьютера и написанных на языке, который машина понимает или может перевести. Сообщение об ошибке - примечание, отображаемое на экране компьютером для того, чтобы сигнализировать пользователю о наличии ошибок в программе. Строка символов - любая последовательность букв, цифр, пробелов, знаков, символов.»", hint:"Наберите весь текст как есть. На следующем шаге разобьёте его на абзацы. Шрифт и форматирование применим позже." },
+  { id:4, title:"Разбейте текст на 7 абзацев", desc:"Поставьте курсор в начало каждого определения (перед словами «Отображение», «Память оперативная», «Память постоянная», «Программа», «Сообщение об ошибке», «Строка символов») и нажмите Enter. Должно получиться 7 абзацев — по одному на каждое определение.", hint:"Каждое определение должно начинаться с новой строки. Не оставляйте пустых строк между абзацами — интервал зададим позже." },
+  { id:5, title:"Отформатируйте текст абзацев", desc:"Выделите все 7 абзацев (от первого до последнего) и примените: шрифт Times New Roman, размер 12, выравнивание по ширине.", hint:"Кликните мышкой слева от первого абзаца и тяните вниз до конца последнего. На вкладке «Главная»: шрифт Times New Roman, размер 12; кнопка «По ширине» (☰)." },
+  { id:6, title:"Выделите каждое определение полужирным курсивом", desc:"По очереди выделяйте каждый из 7 абзацев целиком и применяйте полужирное начертание (Ж) и курсив (К). Повторите для всех 7 абзацев.", hint:"Трижды кликните по абзацу — он выделится целиком. Затем нажмите Ж и К. Переходите к следующему абзацу." },
+  { id:7, title:"Установите интервал после каждого абзаца 3 пт", desc:"Поставьте курсор в каждый из 7 абзацев по очереди (или выделите все сразу) и в выпадающем меню «После абзаца» выберите «3 пт».", hint:"На вкладке «Главная» в группе «Абзац» найдите выпадающее меню «После абзаца» и выберите «3 пт». Если выделить все абзацы сразу — интервал применится ко всем." },
+  { id:8, title:"Сохраните документ", desc:"Сохраните документ под именем «Практическая_работа_2», используя кнопку «Экспорт .docx» на верхней панели.", hint:"Нажмите кнопку «Экспорт .docx» в верхней панели. Файл скачается в папку «Загрузки» и откроется в Word или LibreOffice." }
+];
+var CHECKLIST = [
+  "Заголовок «СЛОВАРЬ ТЕРМИНОВ» набран в отдельной строке",
+  "Заголовок оформлен: шрифт Times New Roman, размер 14, полужирный",
+  "Все 7 определений введены полностью",
+  "Текст разбит на 7 абзацев — каждое определение в отдельном абзаце",
+  "Текст оформлен: шрифт Times New Roman, размер 12",
+  "Выравнивание всех абзацев — по ширине",
+  "Каждое из 7 определений выделено полужирным курсивом",
+  "Интервал после каждого абзаца — 3 пт",
+  "Документ сохранён (экспортирован в .docx)"
+];
+var SYMBOLS = [
+  {label:"Тире —", value:"—"}, {label:"Короткое тире –", value:"–"}, {label:"Многоточие …", value:"…"},
+  {label:"Неразрывный пробел", value:"\u00A0"}, {label:"Стрелка →", value:"→"}, {label:"Стрелка ←", value:"←"},
+  {label:"Номер №", value:"№"}, {label:"Параграф §", value:"§"}, {label:"Градус °", value:"°"},
+  {label:"Кавычки «»", value:"«»"}, {label:"Звезда ★", value:"★"}, {label:"Копирайт ©", value:"©"},
+  {label:"Торг. знак ®", value:"®"}, {label:"Математ. ±", value:"±"}, {label:"Умножение ×", value:"×"}, {label:"Деление ÷", value:"÷"}
+];
+var TEXT_COLORS = ["#000000","#434343","#666666","#999999","#b7b7b7","#cccccc","#d9d9d9","#efefef","#ffffff","#980000","#ff0000","#ff9900","#ffff00","#00ff00","#00ffff","#4a86e8","#0000ff","#9900ff","#e6b8af","#f4cccc","#fce5cd","#fff2cc","#d9ead3","#d0e0e3","#c9daf8","#cfe2f3","#d9d2e9"];
+var HIGHLIGHT_COLORS = ["#ffff00","#00ff00","#00ffff","#ff00ff","#ff9900","#ff0000","#cccccc","#cce5ff","#ffe6e6"];
+var SHAPE_FILL_COLORS = ["#cfe2f3","#fce5cd","#d9ead3","#d9d2e9","#f4cccc","#fff2cc","#ffffff","#cccccc","#000000","#2b579a","#cc6600","#38761d","#674ea7","#990000","#ffff00","#00ff00","#00ffff","#ff00ff","#ff0000"];
+var CELL_COLORS = ["#ffffff","#f1f5f9","#fef3c7","#dcfce7","#dbeafe","#fce7f3","#fed7aa","#e0e7ff","#fef2f2","#d1fae5","#bfdbfe","#fde68a","#fbcfe8","#ddd6fe","#fecaca","#fbbf24","#60a5fa","#34d399","#f472b6","#a78bfa"];
+var SHAPES = [
+  { id:"rect", label:"Прямоугольник", defaultW:140, defaultH:70, svg:'<svg viewBox="0 0 140 70" preserveAspectRatio="none"><rect x="2" y="2" width="136" height="66" fill="#cfe2f3" stroke="#2b579a" stroke-width="2"/></svg>', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="1"/></svg>' },
+  { id:"oval", label:"Овал", defaultW:120, defaultH:80, svg:'<svg viewBox="0 0 120 80" preserveAspectRatio="none"><ellipse cx="60" cy="40" rx="58" ry="38" fill="#fce5cd" stroke="#cc6600" stroke-width="2"/></svg>', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="12" rx="9" ry="7"/></svg>' },
+  { id:"triangle", label:"Треугольник", defaultW:120, defaultH:90, svg:'<svg viewBox="0 0 120 90" preserveAspectRatio="none"><polygon points="60,5 115,85 5,85" fill="#d9ead3" stroke="#38761d" stroke-width="2"/></svg>', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,4 22,20 2,20"/></svg>' },
+  { id:"diamond", label:"Ромб", defaultW:110, defaultH:90, svg:'<svg viewBox="0 0 110 90" preserveAspectRatio="none"><polygon points="55,5 105,45 55,85 5,45" fill="#d9d2e9" stroke="#674ea7" stroke-width="2"/></svg>', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,3 21,12 12,21 3,12"/></svg>' },
+  { id:"arrow", label:"Стрелка", defaultW:150, defaultH:50, svg:'<svg viewBox="0 0 150 50" preserveAspectRatio="none"><polygon points="0,18 95,18 95,5 148,25 95,45 95,32 0,32" fill="#f4cccc" stroke="#990000" stroke-width="2"/></svg>', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="19" y2="12"/><polyline points="13,6 19,12 13,18"/></svg>' },
+  { id:"line", label:"Линия", defaultW:160, defaultH:10, svg:'<svg viewBox="0 0 160 10" preserveAspectRatio="none"><line x1="2" y1="5" x2="158" y2="5" stroke="#000000" stroke-width="3" stroke-linecap="round"/></svg>', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/></svg>' }
+];
+
+// ====== State ======
+var editor = document.getElementById('editor');
+var page = document.getElementById('page');
+var currentTab = 'home';
+var shapeCounter = 0;
+var selectedShape = null;
+var selectedCell = null;
+var dragState = null;
+var tableDragState = null;
+var previousTab = 'home';
+var savedRange = null;
+var selectionStartCell = null;
+var isSelectingCells = false;
+
+// ====== Init ======
+function init() {
+  buildSteps();
+  buildChecklist();
+  buildColorPalettes();
+  buildShapesGrid();
+  buildSymbolsMenu();
+  buildRuler();
+  attachEditorEvents();
+  attachGlobalMouseEvents();
+  updateThemeIcon();
+  updateFullscreenIcon();
+  // Set default document name for this practical work
+  var savedName = localStorage.getItem('trainer-name-2');
+  if (!savedName || savedName === 'Документ1' || savedName === 'Турнир_информатика' || savedName === 'Практическая_работа_1') {
+    document.getElementById('filename').value = 'Практическая_работа_2';
+  }
+  // Restore saved document if any
+  var saved = localStorage.getItem('trainer-doc-2');
+  if (saved) {
+    editor.innerHTML = saved;
+    updateStats();
+  }
+}
+
+function buildSteps() {
+  var c = document.getElementById('steps-container');
+  var html = '';
+  STEPS.forEach(function(s) {
+    html += '<div class="step"><span class="num">' + s.id + '</span><h3>' + s.title + '</h3>' +
+      '<p>' + s.desc + '</p>' +
+      '<button class="hint-btn" onclick="toggleHint(this)">💡 Показать подсказку</button>' +
+      '<div class="hint">' + s.hint + '</div></div>';
+  });
+  c.innerHTML = html;
+}
+
+function toggleHint(btn) {
+  var hint = btn.nextElementSibling;
+  if (hint.classList.contains('open')) {
+    hint.classList.remove('open');
+    btn.textContent = '💡 Показать подсказку';
+  } else {
+    hint.classList.add('open');
+    btn.textContent = '💡 Скрыть подсказку';
+  }
+}
+
+function buildChecklist() {
+  var c = document.getElementById('checklist-container');
+  var html = '';
+  CHECKLIST.forEach(function(text, i) {
+    html += '<div class="check-item" onclick="toggleCheck(this)"><div class="box"></div><div class="text">' + text + '</div></div>';
+  });
+  c.innerHTML = html;
+  updateProgress();
+}
+
+function toggleCheck(item) {
+  item.classList.toggle('checked');
+  updateProgress();
+}
+
+function updateProgress() {
+  var items = document.querySelectorAll('.check-item');
+  var checked = document.querySelectorAll('.check-item.checked').length;
+  var total = items.length;
+  var pct = Math.round(checked / total * 100);
+  document.getElementById('progress-text').textContent = checked + ' из ' + total;
+  document.getElementById('progress-percent').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+function buildColorPalettes() {
+  var tc = document.getElementById('text-colors');
+  var hc = document.getElementById('highlight-colors');
+  TEXT_COLORS.forEach(function(c) {
+    var b = document.createElement('div');
+    b.className = 'swatch';
+    b.style.background = c;
+    b.title = c;
+    b.onclick = function() { applyTextColor(c); closeAllDropdowns(); };
+    tc.appendChild(b);
+  });
+  HIGHLIGHT_COLORS.forEach(function(c) {
+    var b = document.createElement('div');
+    b.className = 'swatch';
+    b.style.background = c;
+    b.title = c;
+    b.onclick = function() { applyHighlight(c); closeAllDropdowns(); };
+    hc.appendChild(b);
+  });
+  var sc = document.getElementById('shape-colors');
+  SHAPE_FILL_COLORS.forEach(function(c) {
+    var b = document.createElement('button');
+    b.className = 'color-btn';
+    b.style.background = c;
+    b.title = c;
+    b.onclick = function() { setShapeColor(c); };
+    sc.appendChild(b);
+  });
+  // Cell background colors
+  var cc = document.getElementById('cell-colors');
+  CELL_COLORS.forEach(function(c) {
+    var b = document.createElement('button');
+    b.className = 'color-btn';
+    b.style.background = c;
+    b.title = c;
+    b.onclick = function() { setCellBgColor(c); };
+    cc.appendChild(b);
+  });
+}
+
+function buildShapesGrid() {
+  var g = document.getElementById('shapes-grid');
+  SHAPES.forEach(function(s) {
+    var cell = document.createElement('div');
+    cell.className = 'shape-cell';
+    cell.title = s.label;
+    cell.innerHTML = s.icon + '<div class="lbl">' + s.label + '</div>';
+    cell.onclick = function() { insertShape(s); closeAllDropdowns(); };
+    g.appendChild(cell);
+  });
+}
+
+function buildSymbolsMenu() {
+  var m = document.getElementById('symbols-menu');
+  var html = '<div class="menu-label">Специальные символы</div><div class="sep"></div>';
+  SYMBOLS.forEach(function(s) {
+    html += '<div class="item" onclick="insertSymbol(\'' + s.value.replace(/'/g, "\\'") + '\'); closeAllDropdowns();">' + s.label + '</div>';
+  });
+  m.innerHTML = html;
+}
+
+function buildRuler() {
+  var s = document.getElementById('ruler-scale');
+  var html = '';
+  for (var i = 0; i <= 20; i++) {
+    html += '<div class="mark"><div class="tick"></div>' + (i % 5 === 0 ? '<span>' + i + '</span>' : '') + '</div>';
+  }
+  s.innerHTML = html;
+}
+
+// ====== Cards ======
+function toggleCard(id) {
+  var c = document.getElementById(id);
+  c.classList.toggle('collapsed');
+  var chev = c.querySelector('.head .chev');
+  chev.textContent = c.classList.contains('collapsed') ? '▶' : '▼';
+}
+
+// ====== Ribbon ======
+function switchTab(tab) {
+  if (tab === 'table' && document.getElementById('tab-table').disabled) return;
+  if (tab !== 'table') previousTab = tab;
+  currentTab = tab;
+  ['home','insert','table','layout'].forEach(function(t) {
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+    var ribbon = document.getElementById('ribbon-' + t);
+    if (ribbon) ribbon.style.display = (t === tab) ? 'flex' : 'none';
+  });
+  closeAllDropdowns();
+}
+
+// ====== Dropdowns ======
+function toggleDropdown(id) {
+  var dd = document.getElementById(id);
+  var wasOpen = dd.classList.contains('open');
+  closeAllDropdowns();
+  if (!wasOpen) dd.classList.add('open');
+}
+
+function closeAllDropdowns() {
+  document.querySelectorAll('.dropdown.open').forEach(function(d) { d.classList.remove('open'); });
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.dropdown')) closeAllDropdowns();
+});
+
+// ====== Editor commands ======
+function saveSelection() {
+  var sel = window.getSelection();
+  if (sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+    savedRange = sel.getRangeAt(0).cloneRange();
+  }
+}
+
+function restoreSelectionIfAny() {
+  editor.focus();
+  if (savedRange) {
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(savedRange);
+  }
+}
+
+function exec(cmd, value) {
+  restoreSelectionIfAny();
+  document.execCommand(cmd, false, value);
+  updateStats();
+  persist();
+}
+
+function ensureSelection() {
+  editor.focus();
+  var sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0 || !editor.contains(sel.anchorNode)) {
+    var range = document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+}
+
+function applyFontFamily(font) { exec('fontName', font); }
+function applyFontSize(size) {
+  editor.focus();
+  ensureSelection();
+  // execCommand fontSize uses 1-7; we replace font[size=7] with span
+  document.execCommand('fontSize', false, '7');
+  var fonts = editor.querySelectorAll('font[size="7"]');
+  fonts.forEach(function(f) {
+    var span = document.createElement('span');
+    span.style.fontSize = size + 'pt';
+    while (f.firstChild) span.appendChild(f.firstChild);
+    f.replaceWith(span);
+  });
+  updateStats();
+}
+
+function changeFontSize(delta) {
+  var sel = document.getElementById('font-size');
+  var newSize = Math.max(8, Math.min(96, parseInt(sel.value, 10) + delta));
+  sel.value = newSize;
+  applyFontSize(String(newSize));
+}
+
+function applyTextColor(color) { exec('foreColor', color); }
+function applyHighlight(color) {
+  restoreSelectionIfAny();
+  try { document.execCommand('hiliteColor', false, color); }
+  catch(e) { document.execCommand('backColor', false, color); }
+  updateStats();
+}
+
+function applyLineSpacing(spacing) {
+  if (!spacing) return;
+  editor.focus();
+  var sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) { showToast('Сначала выделите абзац'); return; }
+  var node = sel.getRangeAt(0).commonAncestorContainer;
+  var block = node.nodeType === 1 ? node : node.parentElement;
+  while (block && !isBlock(block.tagName)) block = block.parentElement;
+  if (block) block.style.lineHeight = spacing;
+  updateStats();
+}
+
+function applyFirstLineIndent(type) {
+  closeAllDropdowns();
+  editor.focus();
+  var sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) { showToast('Поставьте курсор в абзац'); return; }
+  var node = sel.getRangeAt(0).commonAncestorContainer;
+  var block = node.nodeType === 1 ? node : node.parentElement;
+  while (block && !isBlock(block.tagName)) block = block.parentElement;
+  if (!block) return;
+  if (type === 'indent') {
+    block.style.textIndent = '1.25cm';
+    block.style.paddingLeft = '';
+    block.style.marginLeft = '';
+    showToast('Отступ первой строки 1,25 см');
+  } else if (type === 'hanging') {
+    block.style.paddingLeft = '1.25cm';
+    block.style.textIndent = '-1.25cm';
+    showToast('Выступ первой строки 1,25 см');
+  } else {
+    block.style.textIndent = '';
+    block.style.paddingLeft = '';
+    block.style.marginLeft = '';
+    showToast('Отступ первой строки снят');
+  }
+}
+
+function applySpaceAfter(value) {
+  closeAllDropdowns();
+  editor.focus();
+  var sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) { showToast('Поставьте курсор в абзац'); return; }
+  // Find all block elements within the selection (or current paragraph)
+  var range = sel.getRangeAt(0);
+  var container = range.commonAncestorContainer;
+  var blocks = [];
+  if (container.nodeType === 1) {
+    // Could be editor or a block element
+    if (isBlock(container.tagName)) {
+      blocks.push(container);
+    } else {
+      // Find all blocks inside
+      container.querySelectorAll('p, div, li, h1, h2, h3, h4, h5, h6').forEach(function(b) { blocks.push(b); });
+    }
+  } else {
+    var block = container.parentElement;
+    while (block && !isBlock(block.tagName)) block = block.parentElement;
+    if (block) blocks.push(block);
+  }
+  if (blocks.length === 0) { showToast('Не найден абзац для применения интервала'); return; }
+  var cssValue = value === '0' ? '' : value;
+  blocks.forEach(function(b) {
+    b.style.marginBottom = cssValue;
+  });
+  var label = value === '0' ? 'Интервал после абзаца снят' : 'Интервал после абзаца: ' + value;
+  showToast(label);
+  updateStats();
+}
+
+function applyBulletStyle(style) {
+  closeAllDropdowns();
+  editor.focus();
+  var sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) { showToast('Поставьте курсор в абзац'); return; }
+  var node = sel.getRangeAt(0).commonAncestorContainer;
+  var ul = null;
+  while (node && node !== editor) {
+    if (node.tagName === 'UL') { ul = node; break; }
+    node = node.parentElement;
+  }
+  if (!ul) {
+    document.execCommand('insertUnorderedList');
+    var n = sel.anchorNode;
+    while (n && n !== editor) {
+      if (n.tagName === 'UL') { ul = n; break; }
+      n = n.parentElement;
+    }
+  }
+  if (!ul) { showToast('Не удалось создать список'); return; }
+  ul.classList.remove('list-square','list-diamond','list-check');
+  ul.style.listStyleType = '';
+  if (style === 'square') ul.classList.add('list-square');
+  else if (style === 'diamond') ul.classList.add('list-diamond');
+  else if (style === 'check') ul.classList.add('list-check');
+  var labels = {disc:'Стандартный маркёр (•)', square:'Квадрат (▪)', diamond:'Ромб (◆)', check:'Галочка (✓)'};
+  showToast('Маркёр: ' + labels[style]);
+  updateStats();
+}
+
+function clearFormatting() {
+  exec('removeFormat');
+  showToast('Форматирование снято с выделенного текста');
+}
+
+function isBlock(tag) {
+  return ['P','DIV','H1','H2','H3','H4','H5','H6','LI','BLOCKQUOTE','TD','TH','UL','OL'].indexOf(tag.toUpperCase()) !== -1;
+}
+
+// ====== Tables ======
+function insertTable(rows, cols) {
+  ensureSelection();
+  var maxW = 640;
+  var cellW = Math.max(30, Math.floor(maxW / cols));
+  var tableW = Math.min(maxW, cellW * cols);
+  var pad = cols > 8 ? '3px 4px' : '6px 8px';
+  var html = '<table style="border-collapse:collapse;width:' + tableW + 'px;table-layout:fixed;margin:8px 0;"><tbody>';
+  for (var r = 0; r < rows; r++) {
+    html += '<tr>';
+    for (var c = 0; c < cols; c++) {
+      html += '<td style="border:1px solid #555;padding:' + pad + ';width:' + cellW + 'px;">' + (r === 0 ? 'Кол.' + (c+1) : '&nbsp;') + '</td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table><p><br/></p>';
+  document.execCommand('insertHTML', false, html);
+  updateStats();
+  showToast('Таблица вставлена', 'Создана таблица ' + cols + '×' + rows + '. Кликните по ячейке, чтобы ввести текст.');
+  persist();
+}
+
+function openTableDialog() {
+  closeAllDropdowns();
+  document.getElementById('table-dialog').classList.add('open');
+  updateTablePreview();
+}
+function closeTableDialog() {
+  document.getElementById('table-dialog').classList.remove('open');
+}
+function updateTablePreview() {
+  var r = parseInt(document.getElementById('custom-rows').value, 10) || 0;
+  var c = parseInt(document.getElementById('custom-cols').value, 10) || 0;
+  document.getElementById('table-preview').textContent = 'Будет создана таблица ' + r + ' × ' + c + ' (первая строка — заголовки столбцов).';
+}
+document.getElementById('custom-rows').addEventListener('input', updateTablePreview);
+document.getElementById('custom-cols').addEventListener('input', updateTablePreview);
+
+function insertCustomTable() {
+  var rows = Math.max(1, Math.min(50, parseInt(document.getElementById('custom-rows').value, 10) || 1));
+  var cols = Math.max(1, Math.min(20, parseInt(document.getElementById('custom-cols').value, 10) || 1));
+  closeTableDialog();
+  insertTable(rows, cols);
+}
+
+// ====== Symbols ======
+function insertSymbol(sym) {
+  closeAllDropdowns();
+  ensureSelection();
+  document.execCommand('insertText', false, sym);
+  updateStats();
+}
+
+function insertPageBreak() {
+  ensureSelection();
+  document.execCommand('insertHTML', false, '<div style="page-break-after:always;border-top:1px dashed #999;margin:12px 0;text-align:center;color:#999;font-size:11px;">— разрыв страницы —</div><p><br/></p>');
+  updateStats();
+}
+
+// ====== Images ======
+function insertImage(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function() {
+    var dataUrl = reader.result;
+    var img = new Image();
+    img.onload = function() {
+      var natW = img.naturalWidth || 300;
+      var natH = img.naturalHeight || 200;
+      var maxDim = 400;
+      var scale = Math.min(1, maxDim / Math.max(natW, natH));
+      var w = Math.round(natW * scale) || 300;
+      var h = Math.round(natH * scale) || 200;
+      ensureSelection();
+      shapeCounter++;
+      var id = 'shape-' + shapeCounter;
+      var html = '<div class="trainer-shape" data-shape-id="' + id + '" contenteditable="false" style="left:80px;top:120px;width:' + w + 'px;height:' + h + 'px;">' +
+        '<img src="' + dataUrl + '" alt="Рисунок" />' +
+        '<div class="resize-handle"></div><div class="rotate-handle"></div></div>&nbsp;';
+      document.execCommand('insertHTML', false, html);
+      updateStats();
+      var el = editor.querySelector('[data-shape-id="' + id + '"]');
+      if (el) {
+        clearShapeSelection();
+        el.classList.add('is-selected');
+        selectedShape = el;
+        showShapeToolbar(el);
+      }
+      showToast('Изображение вставлено', file.name + ' (' + w + '×' + h + ' px). Двигайте, меняйте размер и поворачивайте.');
+      persist();
+    };
+    img.onerror = function() {
+      ensureSelection();
+      document.execCommand('insertHTML', false, '<img src="' + dataUrl + '" style="max-width:100%;height:auto;margin:8px 0;" alt="Рисунок" />');
+      updateStats();
+      showToast('Изображение вставлено', file.name);
+    };
+    img.src = dataUrl;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+// ====== Shapes ======
+function insertShape(shape) {
+  closeAllDropdowns();
+  ensureSelection();
+  shapeCounter++;
+  var id = 'shape-' + shapeCounter;
+  var html = '<div class="trainer-shape" data-shape-id="' + id + '" contenteditable="false" style="left:80px;top:120px;width:' + shape.defaultW + 'px;height:' + shape.defaultH + 'px;">' + shape.svg + '<div class="resize-handle"></div><div class="rotate-handle"></div></div>&nbsp;';
+  document.execCommand('insertHTML', false, html);
+  updateStats();
+  // Select new shape
+  var el = editor.querySelector('[data-shape-id="' + id + '"]');
+  if (el) {
+    clearShapeSelection();
+    el.classList.add('is-selected');
+    selectedShape = el;
+    showShapeToolbar(el);
+  }
+  showToast('Фигура «' + shape.label + '» вставлена', 'Тяните за тело — перемещение, за угол — размер, за верхний кружок — поворот.');
+  persist();
+}
+
+function clearShapeSelection() {
+  editor.querySelectorAll('.trainer-shape.is-selected').forEach(function(s) { s.classList.remove('is-selected'); });
+  selectedShape = null;
+  hideShapeToolbar();
+}
+
+function showShapeToolbar(el) {
+  var rect = el.getBoundingClientRect();
+  var tb = document.getElementById('shape-toolbar');
+  tb.classList.add('open');
+  var left = Math.max(8, Math.min(rect.left, window.innerWidth - 320));
+  var top = rect.top - 80;
+  if (top < 8) top = rect.bottom + 10;
+  top = Math.max(8, top);
+  tb.style.left = left + 'px';
+  tb.style.top = top + 'px';
+  document.getElementById('shape-dims').textContent = Math.round(rect.width) + '×' + Math.round(rect.height);
+  var isImage = !!el.querySelector('img');
+  var colorLabel = document.getElementById('shape-color-label');
+  var colorSep = document.getElementById('shape-color-sep');
+  var colors = document.getElementById('shape-colors');
+  if (isImage) {
+    if (colorLabel) colorLabel.style.display = 'none';
+    if (colorSep) colorSep.style.display = 'none';
+    if (colors) colors.style.display = 'none';
+  } else {
+    if (colorLabel) colorLabel.style.display = '';
+    if (colorSep) colorSep.style.display = '';
+    if (colors) colors.style.display = 'flex';
+  }
+}
+
+function hideShapeToolbar() {
+  document.getElementById('shape-toolbar').classList.remove('open');
+}
+
+function setShapeColor(color) {
+  if (!selectedShape) return;
+  var svg = selectedShape.querySelector('svg');
+  if (!svg) return;
+  var filled = svg.querySelectorAll('[fill]:not([fill="none"])');
+  if (filled.length > 0) {
+    filled.forEach(function(n) { n.setAttribute('fill', color); });
+  } else {
+    svg.setAttribute('fill', color);
+  }
+  showToast('Цвет заливки: ' + color);
+  persist();
+}
+
+function deleteSelectedShape() {
+  if (!selectedShape) return;
+  selectedShape.remove();
+  selectedShape = null;
+  hideShapeToolbar();
+  updateStats();
+  showToast('Фигура удалена');
+  persist();
+}
+
+// ====== Table cell selection and ribbon tab ======
+function clearCellSelection() {
+  editor.querySelectorAll('td.selected-cell, th.selected-cell').forEach(function(c) {
+    c.classList.remove('selected-cell');
+  });
+  editor.querySelectorAll('td.selected-range, th.selected-range').forEach(function(c) {
+    c.classList.remove('selected-range');
+  });
+  selectedCell = null;
+  selectionStartCell = null;
+  hideTableResizeHandle();
+  var tableTab = document.getElementById('tab-table');
+  if (!tableTab.disabled) {
+    tableTab.disabled = true;
+    if (currentTab === 'table') {
+      switchTab(previousTab || 'home');
+    }
+  }
+}
+
+function showTableResizeHandle() {
+  if (!selectedCell) return;
+  var table = selectedCell.closest('table');
+  if (!table) return;
+  var rect = table.getBoundingClientRect();
+  var handle = document.getElementById('table-resize-handle');
+  handle.style.display = 'block';
+  handle.style.left = (rect.right - 7) + 'px';
+  handle.style.top = (rect.bottom - 7) + 'px';
+}
+
+function hideTableResizeHandle() {
+  document.getElementById('table-resize-handle').style.display = 'none';
+}
+
+function highlightCellRange(startCell, endCell) {
+  editor.querySelectorAll('td.selected-range, th.selected-range').forEach(function(c) {
+    c.classList.remove('selected-range');
+  });
+  if (!startCell || !endCell) return;
+  var table = startCell.closest('table');
+  if (!table || table !== endCell.closest('table')) return;
+  var rows = table.querySelectorAll('tr');
+  var sR = -1, sC = -1, eR = -1, eC = -1;
+  for (var i = 0; i < rows.length; i++) {
+    var cells = rows[i].querySelectorAll('td, th');
+    for (var j = 0; j < cells.length; j++) {
+      if (cells[j] === startCell) { sR = i; sC = j; }
+      if (cells[j] === endCell) { eR = i; eC = j; }
+    }
+  }
+  if (sR < 0 || eR < 0) return;
+  var minR = Math.min(sR, eR), maxR = Math.max(sR, eR);
+  var minC = Math.min(sC, eC), maxC = Math.max(sC, eC);
+  for (var i = minR; i <= maxR; i++) {
+    var cells = rows[i].querySelectorAll('td, th');
+    for (var j = minC; j <= maxC; j++) {
+      if (cells[j]) cells[j].classList.add('selected-range');
+    }
+  }
+}
+
+function mergeCells() {
+  var rangeCells = editor.querySelectorAll('td.selected-range, th.selected-range');
+  if (rangeCells.length < 2) {
+    showToast('Выделите минимум 2 ячейки', 'Зажмите Shift и кликните по второй ячейке.');
+    return;
+  }
+  var table = rangeCells[0].closest('table');
+  var rows = table.querySelectorAll('tr');
+  var minR = -1, maxR = -1, minC = -1, maxC = -1;
+  rangeCells.forEach(function(cell) {
+    for (var i = 0; i < rows.length; i++) {
+      var cells = rows[i].querySelectorAll('td, th');
+      for (var j = 0; j < cells.length; j++) {
+        if (cells[j] === cell) {
+          if (minR < 0 || i < minR) minR = i;
+          if (maxR < 0 || i > maxR) maxR = i;
+          if (minC < 0 || j < minC) minC = j;
+          if (maxC < 0 || j > maxC) maxC = j;
+        }
+      }
+    }
+  });
+  var colSpan = maxC - minC + 1;
+  var rowSpan = maxR - minR + 1;
+  var content = '';
+  rangeCells.forEach(function(cell, idx) {
+    var text = cell.innerHTML.trim();
+    if (text && text !== '&nbsp;') {
+      if (content) content += ' ';
+      content += text;
+    }
+  });
+  var firstCell = rangeCells[0];
+  firstCell.setAttribute('colspan', colSpan);
+  if (rowSpan > 1) firstCell.setAttribute('rowspan', rowSpan);
+  firstCell.innerHTML = content || '&nbsp;';
+  for (var i = 1; i < rangeCells.length; i++) {
+    rangeCells[i].remove();
+  }
+  editor.querySelectorAll('td.selected-range, th.selected-range').forEach(function(c) {
+    c.classList.remove('selected-range');
+  });
+  clearCellSelection();
+  showToast('Ячейки объединены', colSpan + '×' + rowSpan + ' = ' + rangeCells.length + ' ячеек');
+  persist();
+}
+
+document.querySelector('.editor-area').addEventListener('scroll', function() {
+  if (selectedCell) showTableResizeHandle();
+});
+
+document.getElementById('table-resize-handle').addEventListener('mousedown', function(e) {
+  if (!selectedCell) return;
+  var table = selectedCell.closest('table');
+  if (!table) return;
+  var rect = table.getBoundingClientRect();
+  tableDragState = {
+    table: table,
+    startX: e.clientX,
+    startY: e.clientY,
+    origW: rect.width,
+    origH: rect.height
+  };
+  e.preventDefault();
+  e.stopPropagation();
+});
+
+document.addEventListener('mousemove', function(e) {
+  if (!tableDragState) return;
+  var dx = e.clientX - tableDragState.startX;
+  var dy = e.clientY - tableDragState.startY;
+  tableDragState.table.style.width = Math.max(50, tableDragState.origW + dx) + 'px';
+  tableDragState.table.style.height = Math.max(30, tableDragState.origH + dy) + 'px';
+  showTableResizeHandle();
+});
+
+document.addEventListener('mouseup', function() {
+  if (tableDragState) {
+    tableDragState = null;
+    persist();
+  }
+});
+
+function setTableWidth(value) {
+  if (!selectedCell || !value) return;
+  var table = selectedCell.closest('table');
+  if (!table) return;
+  var v = parseInt(value, 10);
+  if (isNaN(v) || v < 50) { showToast('Введите число от 50'); return; }
+  table.style.width = v + 'px';
+  showToast('Ширина таблицы: ' + v + ' px');
+  showTableResizeHandle();
+  persist();
+}
+
+function setCellBgColor(color) {
+  if (!selectedCell) return;
+  selectedCell.style.backgroundColor = color;
+  closeAllDropdowns();
+  showToast('Заливка ячейки: ' + color);
+  persist();
+}
+
+function applyTableBorders(style) {
+  if (!selectedCell) return;
+  closeAllDropdowns();
+  var table = selectedCell.closest('table');
+  if (!table) return;
+  var cells = table.querySelectorAll('td, th');
+  cells.forEach(function(c) {
+    c.style.border = '';
+    c.style.borderLeft = '';
+    c.style.borderRight = '';
+    c.style.borderTop = '';
+    c.style.borderBottom = '';
+    if (style === 'all' || style === 'grid') {
+      c.style.border = '1px solid #555';
+    } else if (style === 'none') {
+      c.style.border = 'none';
+    } else if (style === 'horizontal') {
+      c.style.borderTop = '1px solid #555';
+      c.style.borderBottom = '1px solid #555';
+    } else if (style === 'vertical') {
+      c.style.borderLeft = '1px solid #555';
+      c.style.borderRight = '1px solid #555';
+    }
+  });
+  if (style === 'outer') {
+    table.style.border = '2px solid #555';
+    table.style.borderCollapse = 'collapse';
+    cells.forEach(function(c) { c.style.border = '1px solid #555'; });
+  } else {
+    table.style.border = '';
+  }
+  var labels = {all:'Все границы', none:'Без границ', outer:'Только контур', grid:'Сетка', horizontal:'Горизонтальные', vertical:'Вертикальные'};
+  showToast('Границы: ' + labels[style]);
+  persist();
+}
+
+function addRowAbove() {
+  if (!selectedCell) return;
+  var row = selectedCell.closest('tr');
+  if (!row) return;
+  var cols = row.cells.length;
+  var newRow = document.createElement('tr');
+  for (var i = 0; i < cols; i++) {
+    var td = document.createElement('td');
+    td.style.border = '1px solid #555';
+    td.style.padding = '6px 8px';
+    td.innerHTML = '&nbsp;';
+    newRow.appendChild(td);
+  }
+  row.parentNode.insertBefore(newRow, row);
+  showToast('Строка добавлена выше');
+  persist();
+}
+
+function addRowBelow() {
+  if (!selectedCell) return;
+  var row = selectedCell.closest('tr');
+  if (!row) return;
+  var cols = row.cells.length;
+  var newRow = document.createElement('tr');
+  for (var i = 0; i < cols; i++) {
+    var td = document.createElement('td');
+    td.style.border = '1px solid #555';
+    td.style.padding = '6px 8px';
+    td.innerHTML = '&nbsp;';
+    newRow.appendChild(td);
+  }
+  if (row.nextSibling) {
+    row.parentNode.insertBefore(newRow, row.nextSibling);
+  } else {
+    row.parentNode.appendChild(newRow);
+  }
+  showToast('Строка добавлена ниже');
+  persist();
+}
+
+function addColumnLeft() {
+  if (!selectedCell) return;
+  var cellIndex = selectedCell.cellIndex;
+  var table = selectedCell.closest('table');
+  if (!table) return;
+  var rows = table.querySelectorAll('tr');
+  rows.forEach(function(row) {
+    var refCell = row.cells[cellIndex];
+    if (!refCell) return;
+    var newCell = document.createElement(refCell.tagName === 'TH' ? 'th' : 'td');
+    newCell.style.border = '1px solid #555';
+    newCell.style.padding = '6px 8px';
+    newCell.innerHTML = '&nbsp;';
+    row.insertBefore(newCell, refCell);
+  });
+  showToast('Столбец добавлен слева');
+  persist();
+}
+
+function addColumnRight() {
+  if (!selectedCell) return;
+  var cellIndex = selectedCell.cellIndex;
+  var table = selectedCell.closest('table');
+  if (!table) return;
+  var rows = table.querySelectorAll('tr');
+  rows.forEach(function(row) {
+    var refCell = row.cells[cellIndex];
+    if (!refCell) return;
+    var newCell = document.createElement(refCell.tagName === 'TH' ? 'th' : 'td');
+    newCell.style.border = '1px solid #555';
+    newCell.style.padding = '6px 8px';
+    newCell.innerHTML = '&nbsp;';
+    if (refCell.nextSibling) {
+      row.insertBefore(newCell, refCell.nextSibling);
+    } else {
+      row.appendChild(newCell);
+    }
+  });
+  showToast('Столбец добавлен справа');
+  persist();
+}
+
+function deleteRow() {
+  if (!selectedCell) return;
+  var row = selectedCell.closest('tr');
+  var table = selectedCell.closest('table');
+  if (!row || !table) return;
+  if (table.querySelectorAll('tr').length <= 1) {
+    showToast('Нельзя удалить единственную строку');
+    return;
+  }
+  clearCellSelection();
+  row.remove();
+  showToast('Строка удалена');
+  persist();
+}
+
+function deleteColumn() {
+  if (!selectedCell) return;
+  var cellIndex = selectedCell.cellIndex;
+  var table = selectedCell.closest('table');
+  if (!table) return;
+  var rows = table.querySelectorAll('tr');
+  if (rows[0].cells.length <= 1) {
+    showToast('Нельзя удалить единственный столбец');
+    return;
+  }
+  clearCellSelection();
+  rows.forEach(function(row) {
+    if (row.cells[cellIndex]) row.cells[cellIndex].remove();
+  });
+  showToast('Столбец удалён');
+  persist();
+}
+
+function setColumnWidth(value) {
+  if (!selectedCell || !value) return;
+  var cellIndex = selectedCell.cellIndex;
+  var table = selectedCell.closest('table');
+  if (!table) return;
+  var rows = table.querySelectorAll('tr');
+  var v = parseInt(value, 10);
+  if (isNaN(v) || v < 20) { showToast('Введите число от 20 до 800'); return; }
+  table.style.tableLayout = 'fixed';
+  rows.forEach(function(row) {
+    if (row.cells[cellIndex]) {
+      row.cells[cellIndex].style.width = v + 'px';
+      row.cells[cellIndex].style.minWidth = v + 'px';
+    }
+  });
+  showToast('Ширина столбца: ' + v + ' px');
+  persist();
+}
+
+function setRowHeight(value) {
+  if (!selectedCell || !value) return;
+  var row = selectedCell.closest('tr');
+  if (!row) return;
+  var v = parseInt(value, 10);
+  if (isNaN(v) || v < 10) { showToast('Введите число от 10 до 600'); return; }
+  Array.from(row.cells).forEach(function(c) {
+    c.style.height = v + 'px';
+  });
+  showToast('Высота строки: ' + v + ' px');
+  persist();
+}
+
+// ====== Mouse handlers for shapes ======
+function attachEditorEvents() {
+  editor.addEventListener('mousedown', onEditorMouseDown);
+  editor.addEventListener('input', function() { updateStats(); persist(); });
+  editor.addEventListener('keyup', function() { updateStats(); saveSelection(); });
+  editor.addEventListener('mouseup', function() { updateStats(); saveSelection(); isSelectingCells = false; });
+  editor.addEventListener('mouseover', function(e) {
+    if (!isSelectingCells) return;
+    var cell = e.target.closest('td, th');
+    if (cell && selectionStartCell && cell !== selectionStartCell) {
+      highlightCellRange(selectionStartCell, cell);
+    }
+  });
+}
+
+function onEditorMouseDown(e) {
+  var target = e.target;
+  var rotateHandle = target.closest('.rotate-handle');
+  var resizeHandle = target.closest('.resize-handle');
+  var shape = target.closest('.trainer-shape');
+  var cell = target.closest('td, th');
+
+  if (shape) {
+    clearShapeSelection();
+    if (selectedCell) clearCellSelection();
+    shape.classList.add('is-selected');
+    selectedShape = shape;
+    showShapeToolbar(shape);
+    var mode = rotateHandle ? 'rotate' : (resizeHandle ? 'resize' : 'move');
+    dragState = {
+      id: shape.getAttribute('data-shape-id'),
+      startX: e.clientX, startY: e.clientY,
+      origLeft: shape.offsetLeft, origTop: shape.offsetTop,
+      origW: shape.offsetWidth, origH: shape.offsetHeight,
+      mode: mode
+    };
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
+
+  if (cell) {
+    if (e.shiftKey && selectionStartCell) {
+      e.preventDefault();
+      highlightCellRange(selectionStartCell, cell);
+    } else {
+      editor.querySelectorAll('td.selected-range, th.selected-range').forEach(function(c) {
+        c.classList.remove('selected-range');
+      });
+      if (selectedCell !== cell) {
+        clearCellSelection();
+        cell.classList.add('selected-cell');
+        selectedCell = cell;
+        selectionStartCell = cell;
+        isSelectingCells = true;
+      }
+    }
+    if (selectedShape) clearShapeSelection();
+    var tableTab = document.getElementById('tab-table');
+    if (tableTab.disabled) {
+      tableTab.disabled = false;
+    }
+    if (currentTab !== 'table') {
+      switchTab('table');
+    }
+    showTableResizeHandle();
+    return;
+  }
+
+  // Click outside shape and cell → deselect both
+  if (selectedShape) clearShapeSelection();
+  if (selectedCell) clearCellSelection();
+}
+
+function attachGlobalMouseEvents() {
+  document.addEventListener('mousemove', function(e) {
+    if (!dragState) return;
+    var el = editor.querySelector('[data-shape-id="' + dragState.id + '"]');
+    if (!el) return;
+    if (dragState.mode === 'rotate') {
+      var rect = el.getBoundingClientRect();
+      var cx = rect.left + rect.width / 2;
+      var cy = rect.top + rect.height / 2;
+      var dx = e.clientX - cx;
+      var dy = e.clientY - cy;
+      var angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+      el.style.transform = 'rotate(' + angle.toFixed(1) + 'deg)';
+    } else {
+      var dx = e.clientX - dragState.startX;
+      var dy = e.clientY - dragState.startY;
+      if (dragState.mode === 'move') {
+        el.style.left = Math.max(0, dragState.origLeft + dx) + 'px';
+        el.style.top = Math.max(0, dragState.origTop + dy) + 'px';
+      } else {
+        el.style.width = Math.max(20, dragState.origW + dx) + 'px';
+        el.style.height = Math.max(10, dragState.origH + dy) + 'px';
+      }
+    }
+    showShapeToolbar(el);
+  });
+  document.addEventListener('mouseup', function() {
+    if (dragState) {
+      dragState = null;
+      persist();
+    }
+  });
+  // Keyboard: Delete to remove shape
+  document.addEventListener('keydown', function(e) {
+    if (selectedShape && (e.key === 'Delete' || e.key === 'Backspace')) {
+      // Only when not typing in editor
+      var active = document.activeElement;
+      if (active === editor) {
+        // Allow normal text editing
+        return;
+      }
+      deleteSelectedShape();
+      e.preventDefault();
+    }
+  });
+}
+
+// ====== Page layout ======
+function applyMargins(preset) {
+  closeAllDropdowns();
+  var presets = { normal:'2cm', narrow:'1.27cm', wide:'2.54cm' };
+  var v = presets[preset] || '2cm';
+  page.style.padding = v + ' ' + v + ' ' + v + ' ' + v;
+  showToast('Поля: ' + (preset === 'normal' ? 'Обычные' : preset === 'narrow' ? 'Узкие' : 'Широкие'));
+}
+
+function applyOrientation(orientation) {
+  if (orientation === 'landscape') {
+    page.style.width = '29.7cm';
+    page.style.minHeight = '21cm';
+  } else {
+    page.style.width = '21cm';
+    page.style.minHeight = '29.7cm';
+  }
+  showToast(orientation === 'portrait' ? 'Книжная ориентация' : 'Альбомная ориентация');
+}
+
+// ====== Document operations ======
+function newDocument() {
+  if (editor.innerText.trim() && !confirm('Создать новый документ? Текущий текст будет потерян.')) return;
+  editor.innerHTML = '<p><br/></p>';
+  updateStats();
+  document.getElementById('filename').value = 'Документ1';
+  markUnsaved();
+  showToast('Создан новый документ');
+}
+
+function saveDocument() {
+  try {
+    localStorage.setItem('trainer-doc-2', editor.innerHTML);
+    var name = document.getElementById('filename').value || 'Документ1';
+    localStorage.setItem('trainer-name-2', name);
+    document.getElementById('saved-indicator').style.display = 'inline';
+    showToast('Документ сохранён', '«' + name + '» сохранён в браузере.');
+  } catch(e) {
+    showToast('Ошибка сохранения', 'Возможно, превышен объём localStorage.');
+  }
+}
+
+function exportDoc() {
+  var html = editor.innerHTML;
+  var name = document.getElementById('filename').value || 'Документ';
+  var full = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>' + name + '</title><style>@page{size:A4;margin:2cm;}body{font-family:\'Times New Roman\',serif;font-size:14pt;line-height:1.15;}table{border-collapse:collapse;}td,th{border:1px solid #555;padding:6px 8px;}</style></head><body>' + html + '</body></html>';
+  var blob = new Blob(['\ufeff' + full], { type: 'application/msword' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = name + '.doc';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  document.getElementById('saved-indicator').style.display = 'inline';
+  showToast('Документ экспортирован', 'Файл «' + name + '.doc» сохранён в папку «Загрузки». Открывается в Word и LibreOffice.');
+}
+
+function openFile(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function() {
+    var content = reader.result;
+    var match = content.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+    var body = match ? match[1] : content;
+    editor.innerHTML = body;
+    updateStats();
+    document.getElementById('filename').value = file.name.replace(/\.(docx?|html?)$/i, '');
+    showToast('Документ открыт', file.name);
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function printDocument() {
+  var html = editor.innerHTML;
+  var name = document.getElementById('filename').value || 'Документ';
+  var w = window.open('', '_blank', 'width=800,height=600');
+  if (!w) { showToast('Блокировано всплывающее окно', 'Разрешите всплывающие окна для печати.'); return; }
+  w.document.write('<html><head><meta charset="utf-8"><title>' + name + '</title><style>@page{size:A4;margin:2cm;}body{font-family:\'Times New Roman\',serif;font-size:14pt;line-height:1.15;}table{border-collapse:collapse;}td,th{border:1px solid #555;padding:6px 8px;}</style></head><body>' + html + '</body></html>');
+  w.document.close();
+  w.focus();
+  setTimeout(function() { w.print(); }, 400);
+}
+
+function markUnsaved() {
+  document.getElementById('saved-indicator').style.display = 'none';
+}
+
+// ====== Stats & persistence ======
+function updateStats() {
+  var text = editor.innerText || '';
+  var words = text.trim().split(/\s+/).filter(Boolean).length;
+  document.getElementById('word-count').textContent = words;
+  document.getElementById('char-count').textContent = text.replace(/\s/g, '').length;
+}
+
+var persistTimer = null;
+function persist() {
+  if (persistTimer) clearTimeout(persistTimer);
+  persistTimer = setTimeout(function() {
+    try {
+      localStorage.setItem('trainer-doc-2', editor.innerHTML);
+      var name = document.getElementById('filename').value || 'Документ1';
+      localStorage.setItem('trainer-name-2', name);
+    } catch(e) {}
+  }, 800);
+}
+
+// ====== Toast ======
+var toastTimer = null;
+function showToast(title, desc) {
+  var t = document.getElementById('toast');
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-desc').textContent = desc || '';
+  t.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+// ====== Keyboard shortcuts ======
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey || e.metaKey) {
+    var key = e.key.toLowerCase();
+    if (key === 'b') { e.preventDefault(); exec('bold'); }
+    else if (key === 'i') { e.preventDefault(); exec('italic'); }
+    else if (key === 'u') { e.preventDefault(); exec('underline'); }
+    else if (key === 's') { e.preventDefault(); saveDocument(); }
+    else if (key === 'o') { e.preventDefault(); document.getElementById('file-open').click(); }
+  }
+});
+
+// Close modal on backdrop click
+document.getElementById('table-dialog').addEventListener('click', function(e) {
+  if (e.target === this) closeTableDialog();
+});
+
+// Init on load
+init();
+</script>
+</body>
+</html>
